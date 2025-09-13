@@ -19,6 +19,7 @@ pub fn get_indents(indent: u8) -> String {
 pub fn print_line(text: ColoredString, indent: u8) {
   let text_indents = get_indents(indent);
   println!("{text_indents}{text}");
+  stdout().flush().ok().expect("failed to flush");
 }
 
 pub fn print(text: ColoredString, indent: u8) {

@@ -1,6 +1,11 @@
-use std::{ collections::HashMap, io::{ stdin, stdout } };
+use std::{ collections::HashMap, io::{ stdin, stdout, Write } };
 use colored::Colorize;
-use crossterm::{ cursor, queue };
+use crossterm::{
+  cursor,
+  event::{ read, Event, KeyCode, KeyEvent, KeyEventKind },
+  queue,
+  terminal::{ disable_raw_mode, enable_raw_mode },
+};
 
 use crate::{
   colorize,
@@ -59,12 +64,97 @@ pub fn run<'a>(options: &TerminalMenuOptions<'a>) -> HashMap<&'a str, String> {
         return_values.insert(entry.key, bool_input);
       }
       InputEntry::CHOOSABLE(entry) => {
+        enable_raw_mode().unwrap();
+        queue!(stdout(), cursor::Hide).unwrap();
         let text = format!("{} (choose an option): ", entry.text);
         util::print(
           colorize::paint(text.as_str(), &options.base_color),
           options.indent
         );
-        print!("{:?}", cursor::position());
+        println!();
+        let cursor_start_position = get_current_cursor_row();
+        let mut cursor_current_position = cursor_start_position;
+        let mut current_option_index = (cursor_current_position -
+          cursor_start_position) as usize;
+        let mut chose_option = false;
+        while !chose_option {
+          for (i, option) in entry.options.iter().enumerate() {
+            queue!(
+              stdout(),
+              cursor::MoveTo(0, cursor_start_position + (i as u16))
+            ).unwrap();
+            let list_text = format!("• {}", option.text);
+            if i == current_option_index {
+              util::print_line(
+                colorize::paint(&list_text, &options.base_color),
+                options.indent
+              );
+            } else {
+              util::print_line(list_text.white(), options.indent);
+            }
+          }
+          queue!(stdout(), cursor::MoveTo(0, cursor_current_position)).unwrap();
+          stdout().flush().ok().expect("failed to flush");
+          match read().unwrap() {
+            Event::Key(
+              KeyEvent { code: KeyCode::Esc, kind: KeyEventKind::Press, .. },
+            ) => {
+              panic!("Exited program.");
+            }
+            Event::Key(
+              KeyEvent { code: KeyCode::Up, kind: KeyEventKind::Press, .. },
+            ) => {
+              if current_option_index != 0 {
+                current_option_index = current_option_index - 1;
+                cursor_current_position = cursor_current_position - 1;
+              }
+            }
+            Event::Key(
+              KeyEvent { code: KeyCode::Down, kind: KeyEventKind::Press, .. },
+            ) => {
+              if current_option_index != entry.options.len() - 1 {
+                current_option_index = current_option_index + 1;
+                cursor_current_position = cursor_current_position + 1;
+              }
+            }
+            Event::Key(
+              KeyEvent { code: KeyCode::Enter, kind: KeyEventKind::Press, .. },
+            ) => {
+              return_values.insert(
+                entry.key,
+                entry.options
+                  .get(current_option_index)
+                  .unwrap()
+                  .value.to_string()
+              );
+              chose_option = true;
+            }
+            _ => {
+              chose_option = false;
+            }
+          }
+        }
+        for i in 0..entry.options.len() {
+          queue!(
+            stdout(),
+            cursor::MoveTo(0, cursor_start_position + (i as u16))
+          ).unwrap();
+          clear_rest_of_row();
+        }
+        queue!(stdout(), cursor::MoveTo(0, cursor_start_position - 1)).unwrap();
+        let updated_text = format!(
+          "{}: {}",
+          entry.text,
+          entry.options.get(current_option_index).unwrap().text
+        );
+        util::print(
+          colorize::paint(updated_text.as_str(), &options.base_color),
+          options.indent
+        );
+        clear_rest_of_row();
+        queue!(stdout(), cursor::MoveTo(0, cursor_start_position)).unwrap();
+        disable_raw_mode().unwrap();
+        queue!(stdout(), cursor::Show).unwrap();
       }
     }
   });

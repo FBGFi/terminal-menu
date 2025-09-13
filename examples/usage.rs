@@ -34,6 +34,11 @@ fn main() {
             value: "option_2",
           }
         ],
+      }),
+      InputEntry::BOOL(BooleanInputEntry {
+        key: "another_boolean_entry",
+        text: "Testing another boolean entry",
+        default: false,
       })
     ],
   };
