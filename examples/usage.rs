@@ -19,6 +19,7 @@ fn main() {
       InputEntry::BOOL(BooleanInputEntry {
         key: "boolean_entry",
         text: "Testing boolean entry",
+        default: true,
       }),
       InputEntry::CHOOSABLE(ChoosableInputEntry {
         key: "choosable_entry",
@@ -36,5 +37,6 @@ fn main() {
       })
     ],
   };
-  run_terminal_menu(&options);
+  let config = run_terminal_menu(&options);
+  println!("{:?}", config);
 }

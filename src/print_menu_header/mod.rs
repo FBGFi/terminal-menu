@@ -8,5 +8,5 @@ pub fn print(header_text: &str, base_color: &ColorOptions, indent: u8) {
     colorized_text,
     vec![Styles::Bold, Styles::Underline]
   );
-  util::print_line(stylized_text, indent);
+  util::print_line(stylized_text, indent + 2);
 }

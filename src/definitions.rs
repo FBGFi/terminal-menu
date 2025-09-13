@@ -16,6 +16,7 @@ pub struct ChoosableInputEntry<'a> {
 
 pub struct BooleanInputEntry<'a> {
   pub key: &'a str,
+  pub default: bool,
   pub text: &'a str,
 }
 

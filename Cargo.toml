@@ -8,3 +8,5 @@ name = "usage"
 
 [dependencies]
 colored = "3.0.0"
+crossterm = "0.29.0"
+terminal_size = "0.4.3"
