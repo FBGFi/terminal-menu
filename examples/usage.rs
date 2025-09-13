@@ -6,6 +6,6 @@ use terminal_menu::{
 
 fn main() {
   run_terminal_menu(
-    TerminalMenuOptions::new("Testing text", ColorOptions::BLUE)
+    TerminalMenuOptions::new(ColorOptions::BLUE, 2, "Testing text")
   );
 }
