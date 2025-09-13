@@ -1,9 +1,6 @@
 use colored::{ ColoredString, Colorize };
 
-pub enum ColorOptions {
-  RED,
-  BLUE,
-}
+use crate::definitions::ColorOptions;
 
 pub fn paint(text: &str, color: ColorOptions) -> ColoredString {
   return match color {

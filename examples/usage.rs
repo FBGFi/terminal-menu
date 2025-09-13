@@ -1,11 +1,12 @@
 use terminal_menu::{
-  colorize::ColorOptions,
+  definitions::{ ColorOptions, TerminalMenuOptions },
   run_terminal_menu,
-  TerminalMenuOptions,
 };
 
 fn main() {
-  run_terminal_menu(
-    TerminalMenuOptions::new(ColorOptions::BLUE, 2, "Testing text")
-  );
+  run_terminal_menu(TerminalMenuOptions {
+    base_color: ColorOptions::BLUE,
+    indent: 2,
+    header_text: "Testing text",
+  });
 }
