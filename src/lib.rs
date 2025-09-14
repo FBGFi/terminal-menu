@@ -51,6 +51,16 @@ pub fn run_terminal_menu<'a>(
 #[macro_export]
 macro_rules! run_terminal_menu {
   ($options:expr) => {
+    run_terminal_menu(&$options, $crate::definitions::TerminalColors {
+        base_color: $crate::definitions::ColorOptions::BLUE,
+        selected_option_color: $crate::definitions::ColorOptions::GREEN,
+        falsy_selection_color: $crate::definitions::ColorOptions::RED,
+      })
+  };
+  ($options:expr, $terminal_colors:expr) => {
+    run_terminal_menu(&$options, $terminal_colors)
+  };
+  ($options:expr) => {
     run_terminal_menu($options, $crate::definitions::TerminalColors {
         base_color: $crate::definitions::ColorOptions::BLUE,
         selected_option_color: $crate::definitions::ColorOptions::GREEN,

@@ -11,7 +11,7 @@ use terminal_menu::{
 };
 
 fn main() {
-  let options = TerminalMenuOptions {
+  let config = run_terminal_menu!(TerminalMenuOptions {
     indent: 2,
     header_text: "Testing text",
     description: vec![
@@ -49,7 +49,6 @@ fn main() {
         text: "Testing text entry",
       })
     ],
-  };
-  let config = run_terminal_menu!(&options);
+  });
   println!("{:?}", config);
 }
