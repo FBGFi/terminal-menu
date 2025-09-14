@@ -1,74 +1,35 @@
-use std::{ collections::HashMap, io::{ stdin, stdout, Write }, process::exit };
-use colored::{ ColoredString, Colorize };
-use crossterm::{
-  cursor,
-  event::{ read, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers },
-  queue,
-  terminal::{ disable_raw_mode, enable_raw_mode },
-};
+use std::{ collections::HashMap };
 
 use crate::{
-  colorize,
   definitions::{ InputEntry, TerminalColors, TerminalMenuOptions },
-  util::{
-    self,
-    clear_rest_of_row,
-    get_current_cursor_row,
-    get_terminal_height,
+  run_options::{
+    bool_input::run_bool_input,
+    choosable_input::run_choosable_input,
+    text_input::run_text_input,
   },
 };
 
-fn format_bool_options_text(default_value: bool) -> String {
-  return match default_value {
-    true => format!("({},n)", "Y".underline()),
-    false => format!("(y,{})", "N".underline()),
-  };
-}
+mod bool_input;
+mod text_input;
+mod choosable_input;
 
-fn bool_input_to_text(
-  bool_input: &String,
-  terminal_colors: &TerminalColors
-) -> ColoredString {
-  return match bool_input.as_str() {
-    "y" => colorize::paint("Yes", &terminal_colors.selected_option_color),
-    "n" => colorize::paint("No", &terminal_colors.falsy_selection_color),
-    _ => {
-      panic!("Unknown boolean input: {}", bool_input);
+fn run_input_mode<'a>(
+  options: &TerminalMenuOptions<'a>,
+  terminal_colors: &TerminalColors,
+  return_values: &mut HashMap<&'a str, String>,
+  entry: &InputEntry<'a>
+) {
+  match entry {
+    InputEntry::BOOL(entry) => {
+      run_bool_input(options, terminal_colors, return_values, entry);
     }
-  };
-}
-
-fn get_bool_default_string(default_value: bool) -> String {
-  match default_value {
-    true => "y".to_string(),
-    false => "n".to_string(),
+    InputEntry::TEXT(entry) => {
+      run_text_input(options, terminal_colors, return_values, entry);
+    }
+    InputEntry::CHOOSABLE(entry) => {
+      run_choosable_input(options, terminal_colors, return_values, entry);
+    }
   }
-}
-
-fn get_bool_input(input: String, default_value: bool) -> String {
-  let first_char = input.chars().nth(0);
-  return match first_char {
-    Some(char) => {
-      match char.to_ascii_lowercase() {
-        'y' => "y".to_string(),
-        'n' => "n".to_string(),
-        _ => get_bool_default_string(default_value),
-      }
-    }
-    None => get_bool_default_string(default_value),
-  };
-}
-
-fn get_text_input(input: String, default_value: &str) -> String {
-  let new_line_replaced = input.replace("\n", "");
-  return match new_line_replaced.as_str() {
-    "" => default_value.to_string(),
-    _ => new_line_replaced,
-  };
-}
-
-fn format_text_input_default(default_value: &str) -> String {
-  return format!("({})", default_value.underline());
 }
 
 pub fn run<'a>(
@@ -77,189 +38,7 @@ pub fn run<'a>(
 ) -> HashMap<&'a str, String> {
   let mut return_values: HashMap<&'a str, String> = HashMap::new();
   options.input_entries.iter().for_each(|entry| {
-    match entry {
-      InputEntry::BOOL(entry) => {
-        let text = format!(
-          "{} {}: ",
-          entry.text,
-          format_bool_options_text(entry.default)
-        );
-        util::print(text.white(), options.indent);
-        let mut input = String::new();
-        stdin().read_line(&mut input).expect("Did not enter correct string");
-        let bool_input = get_bool_input(input, entry.default);
-        let updated_text = format!(
-          "{}: {}",
-          entry.text,
-          bool_input_to_text(&bool_input, terminal_colors)
-        );
-        queue!(
-          stdout(),
-          cursor::MoveTo(0, get_current_cursor_row() - 1)
-        ).unwrap();
-        util::print(
-          colorize::paint(updated_text.as_str(), &terminal_colors.base_color),
-          options.indent
-        );
-        clear_rest_of_row();
-        println!();
-        return_values.insert(entry.key, bool_input);
-      }
-      InputEntry::TEXT(entry) => {
-        let text = colorize::paint(
-          format!(
-            "{} {}: ",
-            entry.text,
-            format_text_input_default(entry.default)
-          ).as_str(),
-          &terminal_colors.base_color
-        );
-        util::print(text, options.indent);
-        let mut input = String::new();
-        stdin().read_line(&mut input).expect("Did not enter correct string");
-        let text_input = get_text_input(input, entry.default);
-        let updated_text = format!(
-          "{}: {}",
-          entry.text,
-          colorize::paint(
-            text_input.as_str(),
-            &terminal_colors.selected_option_color
-          )
-        );
-        queue!(
-          stdout(),
-          cursor::MoveTo(0, get_current_cursor_row() - 1)
-        ).unwrap();
-        util::print(
-          colorize::paint(updated_text.as_str(), &terminal_colors.base_color),
-          options.indent
-        );
-        clear_rest_of_row();
-        println!();
-        return_values.insert(entry.key, text_input);
-      }
-      InputEntry::CHOOSABLE(entry) => {
-        enable_raw_mode().unwrap();
-        queue!(stdout(), cursor::Hide).unwrap();
-        let text = format!("{} (choose an option): ", entry.text);
-        util::print(
-          colorize::paint(
-            text.as_str(),
-            &terminal_colors.falsy_selection_color
-          ),
-          options.indent
-        );
-        println!();
-        let cursor_start_position = get_current_cursor_row();
-        let terminal_height = get_terminal_height();
-
-        let mut cursor_current_position = cursor_start_position;
-        let mut current_option_index: usize = 0;
-        let mut chose_option = false;
-        while !chose_option {
-          for (i, option) in entry.options.iter().enumerate() {
-            queue!(
-              stdout(),
-              cursor::MoveTo(0, cursor_current_position + (i as u16))
-            ).unwrap();
-            let list_text = format!("• {}", option.text);
-            if i == current_option_index {
-              util::print_line(
-                colorize::paint(
-                  &list_text,
-                  &terminal_colors.selected_option_color
-                ),
-                options.indent
-              );
-            } else {
-              util::print_line(list_text.white(), options.indent);
-            }
-          }
-          if cursor_start_position >= terminal_height - 1 {
-            cursor_current_position =
-              cursor_start_position - (entry.options.len() as u16);
-          }
-          stdout().flush().ok().expect("failed to flush");
-          match read().unwrap() {
-            Event::Key(
-              KeyEvent { code: KeyCode::Up, kind: KeyEventKind::Press, .. },
-            ) => {
-              if current_option_index != 0 {
-                current_option_index = current_option_index - 1;
-              }
-            }
-            Event::Key(
-              KeyEvent { code: KeyCode::Down, kind: KeyEventKind::Press, .. },
-            ) => {
-              if current_option_index != entry.options.len() - 1 {
-                current_option_index = current_option_index + 1;
-              }
-            }
-            Event::Key(
-              KeyEvent { code: KeyCode::Enter, kind: KeyEventKind::Press, .. },
-            ) => {
-              return_values.insert(
-                entry.key,
-                entry.options
-                  .get(current_option_index)
-                  .unwrap()
-                  .value.to_string()
-              );
-              chose_option = true;
-            }
-            Event::Key(
-              KeyEvent {
-                code: KeyCode::Char('c'),
-                kind: KeyEventKind::Press,
-                modifiers: KeyModifiers::CONTROL,
-                ..
-              },
-            ) => {
-              queue!(stdout(), cursor::Show).unwrap();
-              queue!(
-                stdout(),
-                cursor::MoveTo(
-                  0,
-                  cursor_start_position + (entry.options.len() as u16) + 1
-                )
-              ).unwrap();
-              disable_raw_mode().unwrap();
-              println!();
-              println!("Exited program.");
-              println!();
-              exit(0);
-            }
-            _ => {
-              chose_option = false;
-            }
-          }
-        }
-        for i in 0..entry.options.len() {
-          queue!(
-            stdout(),
-            cursor::MoveTo(0, cursor_current_position + (i as u16))
-          ).unwrap();
-          clear_rest_of_row();
-        }
-        queue!(
-          stdout(),
-          cursor::MoveTo(0, cursor_current_position - 1)
-        ).unwrap();
-        let updated_text = format!(
-          "{}: {}",
-          colorize::paint(entry.text, &terminal_colors.base_color),
-          colorize::paint(
-            entry.options.get(current_option_index).unwrap().text,
-            &terminal_colors.selected_option_color
-          )
-        );
-        util::print(updated_text, options.indent);
-        clear_rest_of_row();
-        queue!(stdout(), cursor::MoveTo(0, cursor_current_position)).unwrap();
-        disable_raw_mode().unwrap();
-        queue!(stdout(), cursor::Show).unwrap();
-      }
-    }
+    run_input_mode(options, terminal_colors, &mut return_values, entry);
   });
   return return_values;
 }
