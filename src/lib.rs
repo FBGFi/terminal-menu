@@ -37,6 +37,6 @@ macro_rules! run_terminal_menu {
       })
   };
   ($options:expr, $terminal_colors:expr) => {
-    run_terminal_menu($options,$terminal_colors)
+    run_terminal_menu($options, $terminal_colors)
   };
 }

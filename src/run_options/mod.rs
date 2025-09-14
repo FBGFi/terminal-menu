@@ -1,8 +1,8 @@
-use std::{ collections::HashMap, io::{ stdin, stdout, Write } };
+use std::{ collections::HashMap, io::{ stdin, stdout, Write }, process::exit };
 use colored::{ ColoredString, Colorize };
 use crossterm::{
   cursor,
-  event::{ read, Event, KeyCode, KeyEvent, KeyEventKind },
+  event::{ read, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers },
   queue,
   terminal::{ disable_raw_mode, enable_raw_mode },
 };
@@ -199,6 +199,28 @@ pub fn run<'a>(
                   .value.to_string()
               );
               chose_option = true;
+            }
+            Event::Key(
+              KeyEvent {
+                code: KeyCode::Char('c'),
+                kind: KeyEventKind::Press,
+                modifiers: KeyModifiers::CONTROL,
+                ..
+              },
+            ) => {
+              queue!(stdout(), cursor::Show).unwrap();
+              queue!(
+                stdout(),
+                cursor::MoveTo(
+                  0,
+                  cursor_start_position + (entry.options.len() as u16) + 1
+                )
+              ).unwrap();
+              disable_raw_mode().unwrap();
+              println!();
+              println!("Exited program.");
+              println!();
+              exit(0);
             }
             _ => {
               chose_option = false;
