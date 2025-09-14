@@ -13,6 +13,10 @@ fn main() {
   let options = TerminalMenuOptions {
     indent: 2,
     header_text: "Testing text",
+    description: vec![
+      "This is a description text,",
+      "broken into multiple lines."
+    ],
     input_entries: vec![
       InputEntry::BOOL(BooleanInputEntry {
         key: "boolean_entry",

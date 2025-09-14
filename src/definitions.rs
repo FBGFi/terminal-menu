@@ -52,5 +52,6 @@ pub struct TerminalColors {
 pub struct TerminalMenuOptions<'a> {
   pub indent: u8,
   pub header_text: &'a str,
+  pub description: Vec<&'a str>,
   pub input_entries: Vec<InputEntry<'a>>,
 }
