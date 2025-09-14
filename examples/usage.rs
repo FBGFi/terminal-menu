@@ -5,6 +5,7 @@ use terminal_menu::{
     ChoosableOption,
     InputEntry,
     TerminalMenuOptions,
+    TextInputEntry,
   },
   run_terminal_menu,
 };
@@ -41,6 +42,11 @@ fn main() {
         key: "another_boolean_entry",
         text: "Testing another boolean entry",
         default: false,
+      }),
+      InputEntry::TEXT(TextInputEntry {
+        key: "text_entry",
+        default: "default_value",
+        text: "Testing text entry",
       })
     ],
   };

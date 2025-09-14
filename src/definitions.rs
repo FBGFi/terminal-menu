@@ -22,9 +22,16 @@ pub struct BooleanInputEntry<'a> {
   pub text: &'a str,
 }
 
+pub struct TextInputEntry<'a> {
+  pub key: &'a str,
+  pub default: &'a str,
+  pub text: &'a str,
+}
+
 pub enum InputEntry<'a> {
   CHOOSABLE(ChoosableInputEntry<'a>),
   BOOL(BooleanInputEntry<'a>),
+  TEXT(TextInputEntry<'a>),
 }
 
 /**
