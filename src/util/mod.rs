@@ -2,7 +2,7 @@ use std::{ fmt::Display, io::{ stdout, Write } };
 
 use colored::ColoredString;
 use crossterm::cursor;
-use terminal_size::{ terminal_size, Width };
+use terminal_size::{ terminal_size, Height, Width };
 
 fn get_n_spaces(num: u16) -> String {
   let mut spaces = String::new();
@@ -32,6 +32,16 @@ fn get_terminal_width() -> u16 {
   let size = terminal_size();
   match size {
     Some((Width(w), _)) => { w }
+    None => {
+      panic!("Terminal not supported");
+    }
+  }
+}
+
+pub fn get_terminal_height() -> u16 {
+  let size = terminal_size();
+  match size {
+    Some((_, Height(h))) => { h }
     None => {
       panic!("Terminal not supported");
     }
