@@ -162,13 +162,13 @@ pub fn run<'a>(
         queue!(stdout(), cursor::MoveTo(0, cursor_start_position - 1)).unwrap();
         let updated_text = format!(
           "{}: {}",
-          entry.text,
-          entry.options.get(current_option_index).unwrap().text
+          colorize::paint(entry.text, &terminal_colors.base_color),
+          colorize::paint(
+            entry.options.get(current_option_index).unwrap().text,
+            &terminal_colors.selected_option_color
+          )
         );
-        util::print(
-          colorize::paint(updated_text.as_str(), &terminal_colors.base_color),
-          options.indent
-        );
+        util::print(updated_text, options.indent);
         clear_rest_of_row();
         queue!(stdout(), cursor::MoveTo(0, cursor_start_position)).unwrap();
         disable_raw_mode().unwrap();

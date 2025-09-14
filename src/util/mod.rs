@@ -1,4 +1,4 @@
-use std::io::{ stdout, Write };
+use std::{ fmt::Display, io::{ stdout, Write } };
 
 use colored::ColoredString;
 use crossterm::cursor;
@@ -24,7 +24,7 @@ pub fn print_line(text: ColoredString, indent: u8) {
   stdout().flush().ok().expect("failed to flush");
 }
 
-pub fn print(text: ColoredString, indent: u8) {
+pub fn print(text: impl Display, indent: u8) {
   let text_indents = get_indents(indent);
   print!("{text_indents}{text}");
   stdout().flush().ok().expect("failed to flush");
