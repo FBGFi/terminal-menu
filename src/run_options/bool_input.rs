@@ -56,7 +56,7 @@ fn get_bool_input(input: String, default_value: bool) -> String {
   };
 }
 
-/// Prints initial option text
+/// Prints initial option text.
 fn print_option_text<'a>(text: &'a str, default_value: bool, indent: u8) {
   let text = format!("{} {}: ", text, format_bool_options_text(default_value));
   util::print(text.white(), indent);
