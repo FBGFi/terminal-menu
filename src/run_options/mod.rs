@@ -13,6 +13,7 @@ mod bool_input;
 mod text_input;
 mod choosable_input;
 
+/// Chooses input mode based on currently active option.
 fn run_input_mode<'a>(
   options: &TerminalMenuOptions<'a>,
   terminal_colors: &TerminalColors,
@@ -32,6 +33,7 @@ fn run_input_mode<'a>(
   }
 }
 
+/// Iterates through given options and enters corresponding input mode for each entry.
 pub fn run<'a>(
   options: &TerminalMenuOptions<'a>,
   terminal_colors: &TerminalColors

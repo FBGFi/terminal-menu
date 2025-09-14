@@ -1,14 +1,10 @@
-use colored::{ Colorize, Styles };
+use colored::{ Colorize };
 
-use crate::{ colorize, definitions::ColorOptions, stylize, util };
+use crate::{ colorize, definitions::ColorOptions, util };
 
 pub fn print_header(header_text: &str, base_color: &ColorOptions, indent: u8) {
   let colorized_text = colorize::paint(header_text, base_color);
-  let stylized_text = stylize::add_styles(
-    colorized_text,
-    vec![Styles::Bold, Styles::Underline]
-  );
-  util::print_line(stylized_text, indent + 2);
+  util::print_line(colorized_text.underline().bold(), indent + 2);
 }
 
 pub fn print_description(description: &Vec<&str>, indent: u8) {
