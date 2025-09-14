@@ -13,6 +13,13 @@ use crate::{
   util::{ self, clear_rest_of_row, get_current_cursor_row },
 };
 
+fn format_bool_options_text(default_value: bool) -> String {
+  return match default_value {
+    true => format!("({},n)", "Y".underline()),
+    false => format!("(y,{})", "N".underline()),
+  };
+}
+
 fn bool_input_to_text(bool_input: &String) -> String {
   return match bool_input.as_str() {
     "y" => "Yes".to_string(),
@@ -24,9 +31,10 @@ fn bool_input_to_text(bool_input: &String) -> String {
 }
 
 fn get_bool_input(input: String, default_value: bool) -> String {
-  return match input.as_str() {
-    "y\n" => "y".to_string(),
-    "n\n" => "n".to_string(),
+  let first_char = input.chars().nth(0);
+  return match first_char {
+    Some('y') => "y".to_string(),
+    Some('n') => "n".to_string(),
     _ => {
       match default_value {
         true => "y".to_string(),
@@ -41,7 +49,11 @@ pub fn run<'a>(options: &TerminalMenuOptions<'a>) -> HashMap<&'a str, String> {
   options.input_entries.iter().for_each(|entry| {
     match entry {
       InputEntry::BOOL(entry) => {
-        let text = format!("{} (y/n): ", entry.text);
+        let text = format!(
+          "{} {}: ",
+          entry.text,
+          format_bool_options_text(entry.default)
+        );
         util::print(text.white(), options.indent);
         let mut input = String::new();
         stdin().read_line(&mut input).expect("Did not enter correct string");
