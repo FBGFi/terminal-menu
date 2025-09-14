@@ -50,6 +50,6 @@ fn main() {
       })
     ],
   };
-  let config = run_terminal_menu(&options, None);
+  let config = run_terminal_menu!(&options);
   println!("{:?}", config);
 }

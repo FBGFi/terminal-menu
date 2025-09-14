@@ -1,9 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{
-  definitions::{ TerminalColors, TerminalMenuOptions },
-  util::get_terminal_colors,
-};
+use crate::{ definitions::{ TerminalColors, TerminalMenuOptions } };
 
 mod print_base_texts;
 mod stylize;
@@ -14,19 +11,32 @@ pub mod definitions;
 
 pub fn run_terminal_menu<'a>(
   options: &TerminalMenuOptions<'a>,
-  terminal_colors: Option<TerminalColors>
+  terminal_colors: TerminalColors
 ) -> HashMap<&'a str, String> {
   println!();
-  let used_colors = get_terminal_colors(terminal_colors);
   print_base_texts::print_header(
     options.header_text,
-    &used_colors.base_color,
+    &terminal_colors.base_color,
     options.indent
   );
   println!();
   print_base_texts::print_description(&options.description, options.indent);
   println!();
-  let return_values = run_options::run(&options, &used_colors);
+  let return_values = run_options::run(&options, &terminal_colors);
   println!();
   return return_values;
+}
+
+#[macro_export]
+macro_rules! run_terminal_menu {
+  ($options:expr) => {
+    run_terminal_menu($options, $crate::definitions::TerminalColors {
+        base_color: $crate::definitions::ColorOptions::BLUE,
+        selected_option_color: $crate::definitions::ColorOptions::GREEN,
+        falsy_selection_color: $crate::definitions::ColorOptions::RED,
+      })
+  };
+  ($options:expr, $terminal_colors:expr) => {
+    run_terminal_menu($options,$terminal_colors)
+  };
 }

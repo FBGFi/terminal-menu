@@ -4,8 +4,6 @@ use colored::ColoredString;
 use crossterm::cursor;
 use terminal_size::{ terminal_size, Width };
 
-use crate::definitions::{ ColorOptions, TerminalColors };
-
 fn get_n_spaces(num: u16) -> String {
   let mut spaces = String::new();
   for _ in 0..num {
@@ -62,18 +60,4 @@ pub fn clear_rest_of_row() {
   let spaces = get_n_spaces(terminal_width - col);
   print!("{}", spaces);
   stdout().flush().ok().expect("failed to flush");
-}
-
-pub fn get_terminal_colors(
-  terminal_colors: Option<TerminalColors>
-) -> TerminalColors {
-  return match terminal_colors {
-    Some(colors) => colors,
-    None =>
-      TerminalColors {
-        base_color: ColorOptions::BLUE,
-        selected_option_color: ColorOptions::GREEN,
-        falsy_selection_color: ColorOptions::RED,
-      },
-  };
 }
