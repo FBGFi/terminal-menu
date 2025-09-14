@@ -86,7 +86,10 @@ pub fn run<'a>(
         queue!(stdout(), cursor::Hide).unwrap();
         let text = format!("{} (choose an option): ", entry.text);
         util::print(
-          colorize::paint(text.as_str(), &terminal_colors.base_color),
+          colorize::paint(
+            text.as_str(),
+            &terminal_colors.falsy_selection_color
+          ),
           options.indent
         );
         println!();
@@ -104,7 +107,10 @@ pub fn run<'a>(
             let list_text = format!("• {}", option.text);
             if i == current_option_index {
               util::print_line(
-                colorize::paint(&list_text, &terminal_colors.base_color),
+                colorize::paint(
+                  &list_text,
+                  &terminal_colors.selected_option_color
+                ),
                 options.indent
               );
             } else {
@@ -114,11 +120,6 @@ pub fn run<'a>(
           queue!(stdout(), cursor::MoveTo(0, cursor_current_position)).unwrap();
           stdout().flush().ok().expect("failed to flush");
           match read().unwrap() {
-            Event::Key(
-              KeyEvent { code: KeyCode::Esc, kind: KeyEventKind::Press, .. },
-            ) => {
-              panic!("Exited program.");
-            }
             Event::Key(
               KeyEvent { code: KeyCode::Up, kind: KeyEventKind::Press, .. },
             ) => {
