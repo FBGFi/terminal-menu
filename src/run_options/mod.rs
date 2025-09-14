@@ -33,17 +33,24 @@ fn bool_input_to_text(
   };
 }
 
+fn get_bool_default_string(default_value: bool) -> String {
+  match default_value {
+    true => "y".to_string(),
+    false => "n".to_string(),
+  }
+}
+
 fn get_bool_input(input: String, default_value: bool) -> String {
   let first_char = input.chars().nth(0);
   return match first_char {
-    Some('y') => "y".to_string(),
-    Some('n') => "n".to_string(),
-    _ => {
-      match default_value {
-        true => "y".to_string(),
-        false => "n".to_string(),
+    Some(char) => {
+      match char.to_ascii_lowercase() {
+        'y' => "y".to_string(),
+        'n' => "n".to_string(),
+        _ => get_bool_default_string(default_value),
       }
     }
+    None => get_bool_default_string(default_value),
   };
 }
 
