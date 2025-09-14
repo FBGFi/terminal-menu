@@ -1,6 +1,8 @@
+#[derive(Clone)]
 pub enum ColorOptions {
   RED,
   BLUE,
+  GREEN,
 }
 
 pub struct ChoosableOption<'a> {
@@ -25,8 +27,29 @@ pub enum InputEntry<'a> {
   BOOL(BooleanInputEntry<'a>),
 }
 
-pub struct TerminalMenuOptions<'a> {
+/**
+ * Colors to be used for texts in terminal. Passing None uses following defaults:
+ * blue - majority of texts
+ * red - falsy values
+ * green - trueish values
+ */
+#[derive(Clone)]
+pub struct TerminalColors {
+  /**
+   * Color that is used for majority of the texts.
+   */
   pub base_color: ColorOptions,
+  /**
+   * Color that is used to print the option that user has selected.
+   */
+  pub selected_option_color: ColorOptions,
+  /**
+   * Color for falsy values (n in boolean selections).
+   */
+  pub falsy_selection_color: ColorOptions,
+}
+
+pub struct TerminalMenuOptions<'a> {
   pub indent: u8,
   pub header_text: &'a str,
   pub input_entries: Vec<InputEntry<'a>>,

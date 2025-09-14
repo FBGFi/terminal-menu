@@ -1,5 +1,5 @@
 use std::{ collections::HashMap, io::{ stdin, stdout, Write } };
-use colored::Colorize;
+use colored::{ ColoredString, Colorize };
 use crossterm::{
   cursor,
   event::{ read, Event, KeyCode, KeyEvent, KeyEventKind },
@@ -9,7 +9,7 @@ use crossterm::{
 
 use crate::{
   colorize,
-  definitions::{ InputEntry, TerminalMenuOptions },
+  definitions::{ InputEntry, TerminalColors, TerminalMenuOptions },
   util::{ self, clear_rest_of_row, get_current_cursor_row },
 };
 
@@ -20,10 +20,13 @@ fn format_bool_options_text(default_value: bool) -> String {
   };
 }
 
-fn bool_input_to_text(bool_input: &String) -> String {
+fn bool_input_to_text(
+  bool_input: &String,
+  terminal_colors: &TerminalColors
+) -> ColoredString {
   return match bool_input.as_str() {
-    "y" => "Yes".to_string(),
-    "n" => "No".to_string(),
+    "y" => colorize::paint("Yes", &terminal_colors.selected_option_color),
+    "n" => colorize::paint("No", &terminal_colors.falsy_selection_color),
     _ => {
       panic!("Unknown boolean input: {}", bool_input);
     }
@@ -44,7 +47,10 @@ fn get_bool_input(input: String, default_value: bool) -> String {
   };
 }
 
-pub fn run<'a>(options: &TerminalMenuOptions<'a>) -> HashMap<&'a str, String> {
+pub fn run<'a>(
+  options: &TerminalMenuOptions<'a>,
+  terminal_colors: &TerminalColors
+) -> HashMap<&'a str, String> {
   let mut return_values: HashMap<&'a str, String> = HashMap::new();
   options.input_entries.iter().for_each(|entry| {
     match entry {
@@ -61,14 +67,14 @@ pub fn run<'a>(options: &TerminalMenuOptions<'a>) -> HashMap<&'a str, String> {
         let updated_text = format!(
           "{}: {}",
           entry.text,
-          bool_input_to_text(&bool_input)
+          bool_input_to_text(&bool_input, terminal_colors)
         );
         queue!(
           stdout(),
           cursor::MoveTo(0, get_current_cursor_row() - 1)
         ).unwrap();
         util::print(
-          colorize::paint(updated_text.as_str(), &options.base_color),
+          colorize::paint(updated_text.as_str(), &terminal_colors.base_color),
           options.indent
         );
         clear_rest_of_row();
@@ -80,7 +86,7 @@ pub fn run<'a>(options: &TerminalMenuOptions<'a>) -> HashMap<&'a str, String> {
         queue!(stdout(), cursor::Hide).unwrap();
         let text = format!("{} (choose an option): ", entry.text);
         util::print(
-          colorize::paint(text.as_str(), &options.base_color),
+          colorize::paint(text.as_str(), &terminal_colors.base_color),
           options.indent
         );
         println!();
@@ -98,7 +104,7 @@ pub fn run<'a>(options: &TerminalMenuOptions<'a>) -> HashMap<&'a str, String> {
             let list_text = format!("• {}", option.text);
             if i == current_option_index {
               util::print_line(
-                colorize::paint(&list_text, &options.base_color),
+                colorize::paint(&list_text, &terminal_colors.base_color),
                 options.indent
               );
             } else {
@@ -160,7 +166,7 @@ pub fn run<'a>(options: &TerminalMenuOptions<'a>) -> HashMap<&'a str, String> {
           entry.options.get(current_option_index).unwrap().text
         );
         util::print(
-          colorize::paint(updated_text.as_str(), &options.base_color),
+          colorize::paint(updated_text.as_str(), &terminal_colors.base_color),
           options.indent
         );
         clear_rest_of_row();

@@ -3,7 +3,6 @@ use terminal_menu::{
     BooleanInputEntry,
     ChoosableInputEntry,
     ChoosableOption,
-    ColorOptions,
     InputEntry,
     TerminalMenuOptions,
   },
@@ -12,7 +11,6 @@ use terminal_menu::{
 
 fn main() {
   let options = TerminalMenuOptions {
-    base_color: ColorOptions::BLUE,
     indent: 2,
     header_text: "Testing text",
     input_entries: vec![
@@ -42,6 +40,6 @@ fn main() {
       })
     ],
   };
-  let config = run_terminal_menu(&options);
+  let config = run_terminal_menu(&options, None);
   println!("{:?}", config);
 }

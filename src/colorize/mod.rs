@@ -6,5 +6,6 @@ pub fn paint(text: &str, color: &ColorOptions) -> ColoredString {
   return match color {
     ColorOptions::RED => { text.red() }
     ColorOptions::BLUE => { text.blue() }
+    ColorOptions::GREEN => { text.green() }
   };
 }
